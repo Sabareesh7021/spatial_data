@@ -18,14 +18,16 @@ class PointMutation:
         }
         }
         result = await db.points.insert_one(point_data)
-       
+        if not result.inserted_id:  
+            raise ValueError("Point not Added")
+        
         return PointType(
             id=str(result.inserted_id),
-            name=result.name,
-            description=result.description,
+            name=point.name,
+            description=point.description,
             location=LocationType(
-            latitude=result.location.latitude,
-            longitude=result.location.longitude
+            latitude=point.location.latitude,
+            longitude=point.location.longitude
         )
         )
 
@@ -44,7 +46,7 @@ class PointMutation:
             }}
         )
 
-        if result.matched_count == 0:
+        if not result.inserted_id:  
             raise ValueError("Point not found")
         
         return PointType(

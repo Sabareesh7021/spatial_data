@@ -10,7 +10,7 @@ class KeyValuePair:
 class Coordinate:
     latitude: float
     longitude: float
-    altitude: Optional[float]
+    altitude: Optional[float] = None
 
 @strawberry.type
 class PolygonType:
@@ -29,7 +29,7 @@ class KeyValuePairInput:
 class CoordinateInput:
     latitude: float
     longitude: float
-    altitude: Optional[float]
+    altitude: Optional[float] = None
 
 @strawberry.input
 class PolygonInput:

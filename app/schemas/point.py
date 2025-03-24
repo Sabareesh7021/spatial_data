@@ -4,6 +4,16 @@ import strawberry
 class LocationType:
     latitude: float
     longitude: float
+    latitudeDelta: float
+    longitudeDelta: float
+
+
+@strawberry.input
+class LocationInput:
+    latitude: float
+    longitude: float
+    latitudeDelta: float
+    longitudeDelta: float
 
 
 @strawberry.type
@@ -11,17 +21,12 @@ class PointType:
     id: str
     name: str
     description: str
-    location: LocationType 
-
-
-@strawberry.input
-class LocationInput:
-    latitude: float
-    longitude: float
-
+    location: LocationType
+    categories: list[str] 
 
 @strawberry.input
 class PointInput:
     name: str
     description: str
     location: LocationInput
+    categories: list[str] 

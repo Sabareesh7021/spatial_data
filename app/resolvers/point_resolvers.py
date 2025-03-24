@@ -1,7 +1,7 @@
 import strawberry
 from bson import ObjectId
 from app.database.connection import get_db
-from app.schemas.point import PointType, PointInput, LocationType
+from app.schemas.point import PointType, PointInput, LatLng
 
 db = get_db()
 
@@ -28,7 +28,7 @@ class PointMutation:
             id=str(result.inserted_id),
             name=point.name,
             description=point.description,
-            location=LocationType(
+            location=LatLng(
                 latitude=point.location.latitude,
                 longitude=point.location.longitude,
                 latitudeDelta=point.location.latitudeDelta,
@@ -62,7 +62,7 @@ class PointMutation:
             id=id,
             name=point.name,
             description=point.description,
-            location=LocationType(
+            location=LatLng(
                 latitude=point.location.latitude,
                 longitude=point.location.longitude,
                 latitudeDelta=point.location.latitudeDelta,
@@ -83,7 +83,7 @@ class PointQuery:
             id=id,
             name=point["name"],
             description=point["description"],
-            location=LocationType(
+            location=LatLng(
                 latitude=point["location"]["latitude"],
                 longitude=point["location"]["longitude"],
                 latitudeDelta=point["location"]["latitudeDelta"],
@@ -112,7 +112,7 @@ class PointQuery:
                 id=str(point["_id"]),
                 name=point["name"],
                 description=point["description"],
-                location=LocationType(
+                location=LatLng(
                     latitude=point["location"]["latitude"],
                     longitude=point["location"]["longitude"],
                     latitudeDelta=point["location"]["latitudeDelta"],

@@ -1,39 +1,24 @@
 import strawberry
 from typing import List, Optional
-
-@strawberry.type
-class KeyValuePair:
-    key: str
-    value: str
-
-@strawberry.type
-class Coordinate:
-    latitude: float
-    longitude: float
-    altitude: Optional[float] = None
+from app.schemas.common import LatLng, LatLngInput
 
 @strawberry.type
 class PolygonType:
     id: str
-    name: str
-    description: str
-    area: List[List[Coordinate]]
-    attributes: List[KeyValuePair]
-
-@strawberry.input
-class KeyValuePairInput:
-    key: str
-    value: str
-
-@strawberry.input
-class CoordinateInput:
-    latitude: float
-    longitude: float
-    altitude: Optional[float] = None
+    coordinates: List[List[LatLng]]
+    fillColor: str
+    strokeColor: str
+    strokeWidth: Optional[int] = 1
+    tappable: Optional[bool] = False
+    zIndex: Optional[int] = 0
+    category: str
 
 @strawberry.input
 class PolygonInput:
-    name: str
-    description: str
-    area: List[List[CoordinateInput]]
-    attributes: List[KeyValuePairInput]
+    coordinates: List[List[LatLngInput]]
+    fillColor: str
+    strokeColor: str
+    strokeWidth: Optional[int] = 1
+    tappable: Optional[bool] = False
+    zIndex: Optional[int] = 0
+    category: str

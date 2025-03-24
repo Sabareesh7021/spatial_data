@@ -82,6 +82,153 @@ The GraphQL Playground is an interactive IDE where you can test your queries and
 
 ---
 
+## 📊 GraphQL API
+
+### 📌 Queries
+
+#### Get a Point by ID
+```graphql
+query {
+  getPoint(id: "<point_id>") {
+    id
+    name
+    description
+    location {
+      latitude
+      longitude
+      latitudeDelta
+      longitudeDelta
+    }
+    categories
+  }
+}
+```
+
+#### Get Points in a Region
+```graphql
+query {
+  getPointsInRegion(latitude: 12.97, longitude: 77.59, latitudeDelta: 0.01, longitudeDelta: 0.01, categories: ["Park", "Restaurant"]) {
+    id
+    name
+    location {
+      latitude
+      longitude
+    }
+  }
+}
+```
+
+#### Get a Polygon by ID
+```graphql
+query {
+  getPolygon(id: "<polygon_id>") {
+    id
+    geometry {
+      type
+      coordinates
+    }
+    category
+  }
+}
+```
+
+#### Get Polygons in a Region
+```graphql
+query {
+  getPolygonsInRegion(minLat: 12.96, minLon: 77.58, maxLat: 12.98, maxLon: 77.60) {
+    id
+    geometry {
+      type
+      coordinates
+    }
+  }
+}
+```
+
+### 📌 Mutations
+
+#### Create a Point
+```graphql
+mutation {
+  createPoint(point: {
+    name: "My Point"
+    description: "This is a test point"
+    location: { latitude: 12.97, longitude: 77.59, latitudeDelta: 0.01, longitudeDelta: 0.01 }
+    categories: ["Park"]
+  }) {
+    id
+    name
+    description
+  }
+}
+```
+
+#### Update a Point
+```graphql
+mutation {
+  updatePoint(id: "<point_id>", point: {
+    name: "Updated Point"
+    description: "Updated description"
+    location: { latitude: 12.97, longitude: 77.59, latitudeDelta: 0.02, longitudeDelta: 0.02 }
+    categories: ["Museum"]
+  }) {
+    id
+    name
+    description
+  }
+}
+```
+
+#### Create a Polygon
+```graphql
+mutation {
+  createPolygon(polygon: {
+    coordinates: [[
+      { latitude: 12.96, longitude: 77.58 },
+      { latitude: 12.98, longitude: 77.58 },
+      { latitude: 12.98, longitude: 77.60 },
+      { latitude: 12.96, longitude: 77.60 },
+      { latitude: 12.96, longitude: 77.58 }
+    ]]
+    fillColor: "#FF0000"
+    strokeColor: "#000000"
+    strokeWidth: 2
+    tappable: true
+    zIndex: 1
+    category: "Restricted Zone"
+  }) {
+    id
+    category
+  }
+}
+```
+
+#### Update a Polygon
+```graphql
+mutation {
+  updatePolygon(id: "<polygon_id>", polygon: {
+    coordinates: [[
+      { latitude: 12.96, longitude: 77.58 },
+      { latitude: 12.98, longitude: 77.58 },
+      { latitude: 12.98, longitude: 77.60 },
+      { latitude: 12.96, longitude: 77.60 },
+      { latitude: 12.96, longitude: 77.58 }
+    ]]
+    fillColor: "#00FF00"
+    strokeColor: "#FFFFFF"
+    strokeWidth: 1
+    tappable: false
+    zIndex: 2
+    category: "Public Park"
+  }) {
+    id
+    category
+  }
+}
+```
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License.

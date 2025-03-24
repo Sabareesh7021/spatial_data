@@ -1,10 +1,9 @@
 import strawberry
 from typing import List
 from bson import ObjectId
-from pymongo.errors import PyMongoError
 from app.database.connection import get_db
 from app.utils.utils import convert_mongo_to_polygon_type
-from app.schemas.polygon import PolygonType, PolygonInput, KeyValuePair
+from app.schemas.polygon import PolygonType, PolygonInput
 
 db = get_db()
 
@@ -12,63 +11,45 @@ db = get_db()
 class PolygonMutation:
     @strawberry.mutation
     async def create_polygon(self, polygon: PolygonInput) -> PolygonType:
-        try:
-            polygon_data = {
-                "name": polygon.name,
-                "description": polygon.description,
-                "area": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [coord.longitude, coord.latitude, coord.altitude or None]
-                            for coord in ring
-                        ]
-                        for ring in polygon.area
-                    ],
-                },
-                "attributes": [{"key": attr.key, "value": attr.value} for attr in polygon.attributes],
-            }
+        polygon_data = {
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[coord.longitude, coord.latitude] for coord in ring] for ring in polygon.coordinates]
+            },
+            "fillColor": polygon.fillColor,
+            "strokeColor": polygon.strokeColor,
+            "strokeWidth": polygon.strokeWidth,
+            "tappable": polygon.tappable,
+            "zIndex": polygon.zIndex,
+            "category": polygon.category
+        }
+        print(polygon_data)
+        result = await db.polygons.insert_one(polygon_data)
+        inserted_polygon = await db.polygons.find_one({"_id": result.inserted_id})
 
-            result = await db.polygons.insert_one(polygon_data)
-            inserted_polygon = await db.polygons.find_one({"_id": result.inserted_id})
-
-            if not inserted_polygon:
-                raise ValueError("Failed to create polygon: Document not found.")
-
-            return convert_mongo_to_polygon_type(inserted_polygon)
-
-        except PyMongoError as e:
-            raise ValueError(f"MongoDB Error: {str(e)}")
-
+        return convert_mongo_to_polygon_type(inserted_polygon)
+    
     @strawberry.mutation
     async def update_polygon(self, id: str, polygon: PolygonInput) -> PolygonType:
-        try:
-            object_id = ObjectId(id)
-        except Exception:
-            raise ValueError("Invalid ObjectId format.")
-
+        polygon_id   = ObjectId(id)
         polygon_data = {
-            "name": polygon.name,
-            "description": polygon.description,
-            "area": {
+            "geometry": {
                 "type": "Polygon",
-                "coordinates": [
-                    [
-                        [coord.longitude, coord.latitude, coord.altitude or None]
-                        for coord in ring
-                    ]
-                    for ring in polygon.area
-                ],
+                "coordinates": [[[coord.longitude, coord.latitude] for coord in ring] for ring in polygon.coordinates]
             },
-            "attributes": [{"key": attr.key, "value": attr.value} for attr in polygon.attributes],
+            "fillColor": polygon.fillColor,
+            "strokeColor": polygon.strokeColor,
+            "strokeWidth": polygon.strokeWidth,
+            "tappable": polygon.tappable,
+            "zIndex": polygon.zIndex,
+            "category": polygon.category
         }
+        await db.polygons.update_one({"_id": polygon_id}, {"$set": polygon_data})
+        updated_polygon = await db.polygons.find_one({"_id": polygon_id})
 
-        update_result = await db.polygons.update_one({"_id": object_id}, {"$set": polygon_data})
+        if not updated_polygon:
+            raise Exception("Polygon not found or update failed.")
 
-        if update_result.matched_count == 0:
-            raise ValueError(f"Polygon with id {id} not found.")
-
-        updated_polygon = await db.polygons.find_one({"_id": object_id})
         return convert_mongo_to_polygon_type(updated_polygon)
 
 
@@ -82,10 +63,26 @@ class PolygonQuery:
             raise ValueError("Invalid ObjectId format.")
 
         polygon = await db.polygons.find_one({"_id": object_id})
-
         if not polygon:
             raise ValueError(f"Polygon with id {id} not found.")
 
         return convert_mongo_to_polygon_type(polygon)
 
-    
+    @strawberry.field
+    async def get_polygons_in_region(self, min_lat: float, min_lon: float, max_lat: float, max_lon: float) -> List[PolygonType]:
+        query = {
+            "geometry": {
+                "$geoWithin": {
+                    "$geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [min_lon, min_lat], [max_lon, min_lat],
+                            [max_lon, max_lat], [min_lon, max_lat], [min_lon, min_lat]
+                        ]]
+                    }
+                }
+            }
+        }
+
+        polygons = await db.polygons.find(query).to_list(length=100)
+        return [convert_mongo_to_polygon_type(polygon) for polygon in polygons]

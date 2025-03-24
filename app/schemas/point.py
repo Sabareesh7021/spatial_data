@@ -1,32 +1,18 @@
 import strawberry
-
-@strawberry.type
-class LocationType:
-    latitude: float
-    longitude: float
-    latitudeDelta: float
-    longitudeDelta: float
-
-
-@strawberry.input
-class LocationInput:
-    latitude: float
-    longitude: float
-    latitudeDelta: float
-    longitudeDelta: float
-
+from typing import List
+from app.schemas.common import LatLng, LatLngInput
 
 @strawberry.type
 class PointType:
     id: str
     name: str
     description: str
-    location: LocationType
-    categories: list[str] 
+    location: LatLng
+    categories: List[str]
 
 @strawberry.input
 class PointInput:
     name: str
     description: str
-    location: LocationInput
-    categories: list[str] 
+    location: LatLngInput
+    categories: List[str]
